@@ -1,6 +1,6 @@
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { integer, pgTable, text } from "drizzle-orm/pg-core";
 
-export const users = sqliteTable("users", {
+export const users = pgTable("users", {
   id: text("id").primaryKey(),
   username: text("username").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
@@ -12,20 +12,21 @@ export const users = sqliteTable("users", {
   createdAt: text("created_at").notNull(),
 });
 
-export const sessions = sqliteTable("sessions", {
+export const sessions = pgTable("sessions", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull().references(() => users.id),
   expiresAt: text("expires_at").notNull(),
   createdAt: text("created_at").notNull(),
 });
 
-export const submissions = sqliteTable("submissions", {
+export const submissions = pgTable("submissions", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull().references(() => users.id),
   taskId: text("task_id").notNull(),
   description: text("description").notNull(),
   evidenceName: text("evidence_name").notNull().default(""),
   evidenceKey: text("evidence_key").notNull().default(""),
+  evidenceData: text("evidence_data").notNull().default(""),
   evidenceUrl: text("evidence_url").notNull().default(""),
   requestedPoints: integer("requested_points").notNull(),
   awardedPoints: integer("awarded_points").notNull().default(0),

@@ -32,7 +32,7 @@ export async function GET(request: Request) {
     ...submission,
     student: publicUser(student),
     task: TASK_MAP[submission.taskId] ?? null,
-    evidencePath: submission.evidenceKey ? `/api/evidence/${submission.id}` : "",
+    evidencePath: submission.evidenceData ? `/api/evidence/${submission.id}` : "",
   }));
 
   return Response.json({

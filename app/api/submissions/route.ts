@@ -1,10 +1,9 @@
-import { env } from "cloudflare:workers";
 import { getDb } from "@/db";
 import { submissions } from "@/db/schema";
 import { getSessionUser } from "@/lib/auth";
 import { TASK_MAP } from "@/lib/tasks";
 
-const MAX_FILE_SIZE = 8 * 1024 * 1024;
+const MAX_FILE_SIZE = 3 * 1024 * 1024;
 const ACCEPTED_TYPES = new Set([
   "application/pdf",
   "image/jpeg",
@@ -36,14 +35,14 @@ export async function POST(request: Request) {
 
   let evidenceKey = "";
   let evidenceName = "";
+  let evidenceData = "";
   if (file instanceof File && file.size > 0) {
     if (file.size > MAX_FILE_SIZE || !ACCEPTED_TYPES.has(file.type)) {
-      return Response.json({ error: "材料仅支持 PDF、JPG、PNG、DOCX，且不超过8MB" }, { status: 400 });
+      return Response.json({ error: "材料仅支持 PDF、JPG、PNG、DOCX，且不超过3MB" }, { status: 400 });
     }
-    if (!env.BUCKET) return Response.json({ error: "文件存储暂不可用，请改用材料链接" }, { status: 503 });
-    evidenceKey = `${user.id}/${Date.now()}-${crypto.randomUUID()}`;
     evidenceName = file.name.slice(0, 120);
-    await env.BUCKET.put(evidenceKey, file.stream(), { httpMetadata: { contentType: file.type } });
+    evidenceKey = file.type;
+    evidenceData = Buffer.from(await file.arrayBuffer()).toString("base64");
   }
 
   const now = new Date().toISOString();
@@ -55,6 +54,7 @@ export async function POST(request: Request) {
     description,
     evidenceName,
     evidenceKey,
+    evidenceData,
     evidenceUrl,
     requestedPoints,
     awardedPoints: 0,

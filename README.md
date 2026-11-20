@@ -23,18 +23,22 @@
 
 ```bash
 npm ci
-npm run build
-node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_sticky_speedball.sql
-npm run dev -- --port 5173
+$env:DATABASE_URL="postgresql://postgres:postgres@localhost:5432/xianfengli"
+npm run db:migrate
+npm run dev
 ```
 
-访问 `http://127.0.0.1:5173/`。
+访问 `http://127.0.0.1:3000/`。
 
 ## 数据与文件
 
-- 结构化数据使用 Cloudflare D1
-- 证明文件使用 Cloudflare R2
+- 使用 PostgreSQL 保存账号、积分、申报记录和小型证明文件
+- 证明文件单个最大 3 MB，适合小规模体验
 - 密码使用 PBKDF2-SHA256 派生后保存
 - 会话 Cookie 为 HttpOnly、SameSite=Lax
+
+## Render 部署
+
+仓库根目录的 `render.yaml` 会创建一个免费 Web Service 和一个免费 PostgreSQL 数据库，自动执行数据库迁移并启动 Next.js 应用。
 
 当前版本用于小规模试用。正式上线前建议补充批量导入、密码重置、学期归档、数据导出、操作日志和备份策略。
